@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Portal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            background: #35424a;
+            color: #ffffff;
+            padding: 20px 0;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        article {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #35424a;
+            font-size: 1.8em;
+        }
+        p {
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+        .author {
+            font-style: italic;
+            color: #777;
+        }
+        .rating {
+            font-weight: bold;
+            color: #35424a;
+        }
+        .no-posts {
+            text-align: center;
+            font-size: 1.2em;
+            color: #999;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #777;
+        }
+        .best-user {
+            background: #e2f7e2;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .like-dislike {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Latest Posts</h1>
+    </header>
+
+    <div class="best-user">
+        <h2>Best User</h2>
+        {% if best_user %}
+            <p>Username: {{ best_user.username }}</p>
+            <p>Rating: {{ best_user.author.rating }}</p>
+        {% else %}
+            <p>No users found.</p>
+        {% endif %}
+    </div>
+
+    <div class="best-post">
+        <h2>Best Post</h2>
+        {% if best_post %}
+            <p>Date: {{ best_post.created_at }}</p>
+            <p>Author: {{ best_post.author.user.username }}</p>
+            <p>Rating: {{ best_post.rating }}</p>
+            <h3>{{ best_post.title }}</h3>
+            <p>{{ best_post.preview }}</p>
+
+            <div class="like-dislike">
+                <form action="{% url 'like_post' best_post.id %}" method="post">{% csrf_token %}
+                    <button type="submit">Like</button>
+                </form>
+                <form action="{% url 'dislike_post' best_post.id %}" method="post">{% csrf_token %}
+                    <button type="submit">Dislike</button>
+                </form>
+            </div>
+
+            <h4>Comments:</h4>
+            {% for comment in comments %}
+                <p>{{ comment.created_at }} - {{ comment.user.username }}: {{ comment.text }} (Rating: {{ comment.rating }})</p>
+                <div class="like-dislike">
+                    <form action="{% url 'like_comment' comment.id %}" method="post">{% csrf_token %}
+                        <button type="submit">Like</button>
+                    </form>
+                    <form action="{% url 'dislike_comment' comment.id %}" method="post">{% csrf_token %}
+                        <button type="submit">Dislike</button>
+                    </form>
+                </div>
+            {% empty %}
+                <p>No comments yet.</p>
+            {% endfor %}
+        {% else %}
+            <p>No posts available.</p>
+        {% endif %}
+    </div>
+
+    {% if posts %}
+        {% for post in posts %}
+            <article>
+                <h2>{{ post.title }}</h2>
+                <p class="author">By {{ post.author.user.username }}</p>
+                <p>{{ post.preview }}</p>
+                <p class="rating">Rating: {{ post.rating }}</p>
+                <div class="like-dislike">
+                    <form action="{% url 'like_post' post.id %}" method="post">{% csrf_token %}
+                        <button type="submit">Like</button>
+                    </form>
+                    <form action="{% url 'dislike_post' post.id %}" method="post">{% csrf_token %}
+                        <button type="submit">Dislike</button>
+                    </form>
+                </div>
+                <p class="categories">Categories:
+                    {% for category in post.categories.all %}
+                        {{ category.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+            </article>
+        {% endfor %}
+    {% else %}
+        <p class="no-posts">No posts available.</p>
+    {% endif %}
+
+    <footer>
+        <p>&copy; 2024 News Portal. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
